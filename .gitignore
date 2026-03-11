@@ -1,4 +1,8 @@
 node_modules
 .local
 .env
+.env.*
+.secrets
 dist
+.test-dist
+.idea

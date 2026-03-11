@@ -1,10 +1,6 @@
 /**
- * @param {import("knex").Knex} knex
  * @returns {Promise<void>}
  */
-export async function seed(knex) {
-    await knex("spreadsheets")
-        .insert([{ spreadsheet_id: "some_spreadsheet" }])
-        .onConflict(["spreadsheet_id"])
-        .ignore();
+export async function seed() {
+    // Spreadsheet IDs are synchronized from GOOGLE_SPREADSHEET_IDS at runtime.
 }

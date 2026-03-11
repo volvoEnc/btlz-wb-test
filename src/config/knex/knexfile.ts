@@ -2,6 +2,9 @@ import env from "#config/env/env.js";
 import { Knex } from "knex";
 import { z } from "zod";
 
+/**
+ * Схема валидации параметров соединения с PostgreSQL.
+ */
 const connectionSchema = z.object({
     host: z.string(),
     port: z.number(),
@@ -10,18 +13,24 @@ const connectionSchema = z.object({
     password: z.string(),
 });
 
-const NODE_ENV = env.NODE_ENV ?? "development";
+/**
+ * Текущее окружение выполнения приложения.
+ */
+const NODE_ENV = env.NODE_ENV;
 
-const knegConfigs: Record<typeof NODE_ENV, Knex.Config> = {
+/**
+ * Набор knex-конфигураций для development и production окружений.
+ */
+const knexConfigs: Record<typeof NODE_ENV, Knex.Config> = {
     development: {
         client: "pg",
         connection: () =>
             connectionSchema.parse({
                 host: env.POSTGRES_HOST ?? "localhost",
-                port: env.POSTGRES_PORT ?? 5432,
-                database: env.POSTGRES_DB ?? "postgres",
-                user: env.POSTGRES_USER ?? "postgres",
-                password: env.POSTGRES_PASSWORD ?? "postgres",
+                port: env.POSTGRES_PORT,
+                database: env.POSTGRES_DB,
+                user: env.POSTGRES_USER,
+                password: env.POSTGRES_PASSWORD,
             }),
         pool: {
             min: 2,
@@ -43,7 +52,7 @@ const knegConfigs: Record<typeof NODE_ENV, Knex.Config> = {
         client: "pg",
         connection: () =>
             connectionSchema.parse({
-                host: env.POSTGRES_HOST,
+                host: env.POSTGRES_HOST ?? "postgres",
                 port: env.POSTGRES_PORT,
                 database: env.POSTGRES_DB,
                 user: env.POSTGRES_USER,
@@ -54,17 +63,20 @@ const knegConfigs: Record<typeof NODE_ENV, Knex.Config> = {
             max: 10,
         },
         migrations: {
-            stub: 'dist/config/knex/migration.stub.js',
+            stub: "dist/config/knex/migration.stub.js",
             directory: "./dist/postgres/migrations",
             tableName: "migrations",
             extension: "js",
         },
         seeds: {
-            stub: 'src/config/knex/seed.stub.js',
+            stub: "dist/config/knex/seed.stub.js",
             directory: "./dist/postgres/seeds",
             extension: "js",
         },
     },
 };
 
-export default knegConfigs[NODE_ENV];
+/**
+ * Активная knex-конфигурация для текущего окружения.
+ */
+export default knexConfigs[NODE_ENV];

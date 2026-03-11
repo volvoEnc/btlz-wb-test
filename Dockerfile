@@ -1,15 +1,14 @@
-# your node version
 FROM node:20-alpine AS deps-prod
 
 WORKDIR /app
 
 COPY ./package*.json .
 
-RUN npm install --omit=dev
+RUN npm ci --omit=dev
 
 FROM deps-prod AS build
 
-RUN npm install --include=dev
+RUN npm ci --include=dev
 
 COPY . .
 
@@ -22,3 +21,5 @@ WORKDIR /app
 COPY --from=build /app/package*.json .
 COPY --from=deps-prod /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
+
+CMD ["npm", "run", "start"]

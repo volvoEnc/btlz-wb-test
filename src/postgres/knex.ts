@@ -1,9 +1,18 @@
 import _knex from "knex";
 import knexConfig from "#config/knex/knexfile.js";
 
+/**
+ * Единый экземпляр knex для всего приложения.
+ */
 const knex = _knex(knexConfig);
 export default knex;
 
+/**
+ * Логирует результат выполнения миграции.
+ *
+ * @param action Тип выполненного действия.
+ * @param result Результат от knex migrate API.
+ */
 function logMigrationResults(action: string, result: [number, string[]]) {
     if (result[1].length === 0) {
         console.log(["latest", "up"].includes(action) ? "All migrations are up to date" : "All migrations have been rolled back");
@@ -14,6 +23,11 @@ function logMigrationResults(action: string, result: [number, string[]]) {
         console.log("- " + migration);
     }
 }
+/**
+ * Логирует список выполненных и ожидающих миграций.
+ *
+ * @param list Список completed и pending миграций.
+ */
 function logMigrationList(list: [{ name: string }[], { file: string }[]]) {
     console.log(`Found ${list[0].length} Completed Migration file/files.`);
     for (const migration of list[0]) {
@@ -25,6 +39,11 @@ function logMigrationList(list: [{ name: string }[], { file: string }[]]) {
     }
 }
 
+/**
+ * Логирует результат выполнения seed-файлов.
+ *
+ * @param result Результат от knex seed API.
+ */
 function logSeedRun(result: [string[]]) {
     if(result[0].length === 0) {
         console.log("No seeds to run");
@@ -36,10 +55,18 @@ function logSeedRun(result: [string[]]) {
     // Ran 5 seed files
 }
 
+/**
+ * Логирует имя созданного seed-файла.
+ *
+ * @param name Полный путь к созданному файлу.
+ */
 function logSeedMake(name: string) {
     console.log(`Created seed: ${name.split(/\/|\\/).pop()}`);
 }
 
+/**
+ * Набор обёрток вокруг knex migrate API.
+ */
 export const migrate = {
     latest: async () => {
         logMigrationResults("latest", await knex.migrate.latest());
@@ -65,6 +92,9 @@ export const migrate = {
     },
 };
 
+/**
+ * Набор обёрток вокруг knex seed API.
+ */
 export const seed = {
     run: async () => {
         logSeedRun(await knex.seed.run());

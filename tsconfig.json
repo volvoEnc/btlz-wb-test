@@ -7,6 +7,9 @@
         "allowJs": true,
         "checkJs": true,
         "skipLibCheck": true,
+        "types": [
+            "node"
+        ],
         "rootDir": "./src",
         "outDir": "./dist",
         "paths": {
@@ -22,6 +25,7 @@
     ],
     "exclude": [
         "node_modules",
+        "src/testing/**/*",
         "src/**/*.test.*",
         "src/**/*.spec.*"
     ]

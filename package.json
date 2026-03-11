@@ -1,21 +1,21 @@
 {
     "name": "btlz-test",
     "version": "1.0.0",
-    "description": "your description",
-    "main": "app.js",
+    "description": "WB tariffs sync service",
+    "main": "dist/app.js",
     "type": "module",
     "scripts": {
-        "dev": "nodemon --watch src --ext ts --exec tsx src/app.ts",
-        "watch:build": "tsc --build --force --verbose --watch",
-        "knex:dev": "tsx src/utils/knex.ts",
-
-        "build": "tsc --allowJs",
+        "dev": "npm run build && node --watch dist/app.js",
+        "watch:build": "node node_modules/typescript/bin/tsc --build --watch",
+        "knex:dev": "npm run build && node dist/utils/knex.js",
+        "build": "node node_modules/typescript/bin/tsc --build --force",
+        "build:test": "node node_modules/typescript/bin/tsc --project tsconfig.test.json --pretty false",
         "start": "node dist/app.js",
+        "test": "npm run build && npm run build:test && node --test .test-dist",
         "knex": "node dist/utils/knex.js",
-        
-        "tsc:check": "tsc --allowJs --noEmit",
-        "prettier": "prettier --config .prettierrc.json src/**/*.js --check",
-        "prettier-format": "prettier --config .prettierrc.json src/**/*.js --write",
+        "tsc:check": "node node_modules/typescript/bin/tsc --noEmit",
+        "prettier": "prettier --config .prettierrc.json \"src/**/*.{ts,js}\" --check",
+        "prettier-format": "prettier --config .prettierrc.json \"src/**/*.{ts,js}\" --write",
         "eslint": "eslint",
         "eslint-fix": "eslint --fix"
     },

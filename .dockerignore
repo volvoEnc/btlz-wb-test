@@ -1,6 +1,10 @@
 .dockerignore
+.env
+.env.*
 node_modules
 .vscode
 .sql
 .idea
 dist
+.test-dist
+tsconfig.tsbuildinfo
