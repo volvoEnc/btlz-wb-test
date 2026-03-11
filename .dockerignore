@@ -1,6 +1,6 @@
 .dockerignore
 .env
-.env.*
+env.example
 node_modules
 .vscode
 .sql
