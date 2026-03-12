@@ -3,44 +3,44 @@ import { type SyncTrigger, SyncDailyWbTariffsUseCase } from "#application/use-ca
 import { SyncCurrentTariffsToSpreadsheetsUseCase } from "#application/use-cases/sync-current-tariffs-to-spreadsheets.use-case.js";
 
 /**
- * Зависимости оркестратора полного цикла синхронизации.
+ * Зависимости полного цикла.
  */
 interface RunTariffSyncCycleDependencies {
-    /** Spreadsheet IDs из runtime-конфигурации. */
+    /** ID таблиц из конфига. */
     configuredSpreadsheetIds: string[];
-    /** Имя листа по умолчанию. */
+    /** Имя листа. */
     defaultSheetName: string;
-    /** Репозиторий целевых таблиц. */
+    /** Репозиторий таблиц. */
     spreadsheetTargetRepository: SpreadsheetTargetRepository;
-    /** Сценарий публикации в таблицы. */
+    /** Выгрузка в таблицы. */
     syncCurrentTariffsToSpreadsheetsUseCase: SyncCurrentTariffsToSpreadsheetsUseCase;
-    /** Сценарий загрузки тарифов WB. */
+    /** Загрузка WB. */
     syncDailyWbTariffsUseCase: SyncDailyWbTariffsUseCase;
 }
 
 /**
- * Команда полного цикла синхронизации тарифов.
+ * Команда полного цикла.
  */
 export interface RunTariffSyncCycleCommand {
-    /** Бизнес-дата цикла. */
+    /** Дата. */
     businessDate: string;
-    /** Тип запуска цикла. */
+    /** Причина запуска. */
     trigger: SyncTrigger;
 }
 
 /**
- * Оркестратор полного цикла: обновление списка таблиц, загрузка WB и публикация в Sheets.
+ * Полный цикл: WB + Sheets.
  */
 export class RunTariffSyncCycleUseCase {
     /**
-     * @param dependencies Подключенные use case'ы и репозитории.
+     * @param dependencies Зависимости.
      */
     public constructor(private readonly dependencies: RunTariffSyncCycleDependencies) {}
 
     /**
-     * Выполняет полный цикл синхронизации тарифа.
+     * Запускает цикл.
      *
-     * @param command Команда выполнения сценария.
+     * @param command Команда.
      */
     public async execute(command: RunTariffSyncCycleCommand): Promise<void> {
         const {

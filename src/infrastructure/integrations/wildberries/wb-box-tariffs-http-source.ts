@@ -4,7 +4,7 @@ import type { WarehouseTariff } from "#domain/tariffs/entities/warehouse-tariff.
 import { z } from "zod";
 
 /**
- * Zod-схема одной строки тарифа WB по складу.
+ * Схема строки склада.
  */
 const warehouseTariffSchema = z.object({
     boxDeliveryBase: z.string(),
@@ -21,7 +21,7 @@ const warehouseTariffSchema = z.object({
 });
 
 /**
- * Zod-схема ответа WB API `tariffs/box`.
+ * Схема ответа WB.
  */
 const wbTariffResponseSchema = z.object({
     response: z.object({
@@ -34,21 +34,21 @@ const wbTariffResponseSchema = z.object({
 });
 
 /**
- * Конфигурация HTTP-адаптера Wildberries API.
+ * Конфиг WB API.
  */
 interface WbBoxTariffsHttpSourceConfig {
-    /** URL endpoint WB API. */
+    /** URL. */
     apiUrl: string;
-    /** Таймаут HTTP-запроса в миллисекундах. */
+    /** Таймаут, мс. */
     requestTimeoutMs: number;
-    /** Токен авторизации WB API. */
+    /** Токен. */
     token?: string;
 }
 
 /**
- * Преобразует строковое значение WB в число с учетом локали ответа.
+ * Парсит число из WB.
  *
- * @param value Значение поля тарифа из ответа WB.
+ * @param value Значение поля.
  */
 function parseWbNumber(value: string): number | null {
     const normalizedValue = value.replace(/ /g, "").replace(",", ".").trim();
@@ -62,9 +62,20 @@ function parseWbNumber(value: string): number | null {
 }
 
 /**
- * Преобразует DTO ответа WB в доменную сущность тарифа по складу.
+ * Пустую дату делает `null`.
  *
- * @param warehouse Строка тарифа склада из WB API.
+ * @param value Значение поля.
+ */
+function parseOptionalWbDate(value: string): string | null {
+    const normalizedValue = value.trim();
+
+    return normalizedValue.length > 0 ? normalizedValue : null;
+}
+
+/**
+ * Маппит строку склада.
+ *
+ * @param warehouse Данные склада.
  */
 function mapWarehouseTariff(warehouse: z.infer<typeof warehouseTariffSchema>): WarehouseTariff {
     return {
@@ -83,11 +94,11 @@ function mapWarehouseTariff(warehouse: z.infer<typeof warehouseTariffSchema>): W
 }
 
 /**
- * HTTP-адаптер получения тарифов коробов из Wildberries API.
+ * Забирает тарифы из WB API.
  */
 export class WbBoxTariffsHttpSource implements TariffSource {
     /**
-     * @param config Конфигурация подключения к WB API.
+     * @param config Конфиг.
      */
     public constructor(private readonly config: WbBoxTariffsHttpSourceConfig) {}
 
@@ -129,8 +140,8 @@ export class WbBoxTariffsHttpSource implements TariffSource {
             const payload = wbTariffResponseSchema.parse(await response.json());
 
             return {
-                dtNextBox: payload.response.data.dtNextBox,
-                dtTillMax: payload.response.data.dtTillMax,
+                dtNextBox: parseOptionalWbDate(payload.response.data.dtNextBox),
+                dtTillMax: parseOptionalWbDate(payload.response.data.dtTillMax),
                 fetchedAt: new Date().toISOString(),
                 sourcePayload: payload,
                 tariffDate,

@@ -5,7 +5,7 @@ import type { TariffCoefficientField } from "#domain/tariffs/value-objects/tarif
 import type { Knex } from "knex";
 
 /**
- * Маппинг доменного поля сортировки на имя колонки в PostgreSQL.
+ * Поле сортировки -> колонка.
  */
 const sortColumnMap: Record<TariffCoefficientField, string> = {
     box_delivery_coef_expr: "box_delivery_coef_expr",
@@ -14,9 +14,9 @@ const sortColumnMap: Record<TariffCoefficientField, string> = {
 };
 
 /**
- * Нормализует дату/время из PostgreSQL в ISO-строку.
+ * Делает ISO-строку.
  *
- * @param value Значение из драйвера БД.
+ * @param value Значение из БД.
  */
 const toIsoString = (value: unknown): string => {
     if (value instanceof Date) {
@@ -27,11 +27,53 @@ const toIsoString = (value: unknown): string => {
 };
 
 /**
- * PostgreSQL-реализация репозитория тарифов.
+ * Делает `YYYY-MM-DD`.
+ *
+ * @param value Значение даты.
+ */
+const toDateOnlyString = (value: unknown): string => {
+    if (value instanceof Date) {
+        return value.toISOString().slice(0, 10);
+    }
+
+    if (typeof value === "string") {
+        const trimmedValue = value.trim();
+
+        if (/^\d{4}-\d{2}-\d{2}$/.test(trimmedValue)) {
+            return trimmedValue;
+        }
+
+        const parsedDate = new Date(trimmedValue);
+
+        if (!Number.isNaN(parsedDate.getTime())) {
+            return parsedDate.toISOString().slice(0, 10);
+        }
+
+        return trimmedValue;
+    }
+
+    return String(value);
+};
+
+/**
+ * Нормализует nullable-даты.
+ *
+ * @param value Значение даты.
+ */
+const toNullableString = (value: unknown): string | null => {
+    if (value === null || value === undefined) {
+        return null;
+    }
+
+    return toDateOnlyString(value);
+};
+
+/**
+ * Репозиторий тарифов в PostgreSQL.
  */
 export class PostgresTariffRepository implements TariffRepository {
     /**
-     * @param knex Подключение knex к PostgreSQL.
+     * @param knex Подключение knex.
      */
     public constructor(private readonly knex: Knex) {}
 
@@ -56,7 +98,7 @@ export class PostgresTariffRepository implements TariffRepository {
             return null;
         }
 
-        const sourceDate = String(sourceDateRecord.sourceDate);
+        const sourceDate = toDateOnlyString(sourceDateRecord.sourceDate);
         const sortColumn = sortColumnMap[sortBy];
 
         const rows = await this.knex("wb_box_tariff_warehouses as warehouses")
@@ -84,9 +126,9 @@ export class PostgresTariffRepository implements TariffRepository {
         return {
             rows: rows.map((row) => ({
                 ...row,
-                dtNextBox: String(row.dtNextBox),
-                dtTillMax: String(row.dtTillMax),
-                tariffDate: String(row.tariffDate),
+                dtNextBox: toNullableString(row.dtNextBox),
+                dtTillMax: toNullableString(row.dtTillMax),
+                tariffDate: toDateOnlyString(row.tariffDate),
                 updatedAt: toIsoString(row.updatedAt),
             })),
             sourceDate,

@@ -3,20 +3,20 @@ import type { DailyTariffSnapshot } from "#domain/tariffs/entities/daily-tariff-
 import type { TariffCoefficientField } from "#domain/tariffs/value-objects/tariff-coefficient-field.js";
 
 /**
- * Порт хранения и чтения тарифов.
+ * Хранилище тарифов.
  */
 export interface TariffRepository {
     /**
-     * Возвращает последнее доступное представление тарифа для экспорта в таблицы.
+     * Возвращает данные для выгрузки.
      *
-     * @param preferredDate Предпочтительная бизнес-дата.
-     * @param sortBy Поле сортировки по коэффициенту.
+     * @param preferredDate Нужная дата.
+     * @param sortBy Поле сортировки.
      */
     getLatestSpreadsheetView(preferredDate: string, sortBy: TariffCoefficientField): Promise<TariffSpreadsheetView | null>;
     /**
-     * Сохраняет или обновляет снимок тарифа за день.
+     * Сохраняет снимок за день.
      *
-     * @param snapshot Снимок тарифа за бизнес-дату.
+     * @param snapshot Снимок тарифа.
      */
     saveDailySnapshot(snapshot: DailyTariffSnapshot): Promise<void>;
 }

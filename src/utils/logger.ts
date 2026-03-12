@@ -1,12 +1,12 @@
 /**
- * Допустимые типы payload для логгера.
+ * Payload для логгера.
  */
 type LogPayload = Record<string, unknown> | string | null | undefined;
 
 /**
- * Приводит payload к строке для вывода в лог.
+ * Собирает хвост лога.
  *
- * @param payload Дополнительные данные лога.
+ * @param payload Данные.
  */
 const serializePayload = (payload: LogPayload) => {
     if (payload === null || payload === undefined) {
@@ -21,12 +21,12 @@ const serializePayload = (payload: LogPayload) => {
 };
 
 /**
- * Печатает строку лога в нужный поток консоли.
+ * Печатает строку лога.
  *
  * @param method Метод консоли.
- * @param scope Логический scope сообщения.
- * @param message Основной текст сообщения.
- * @param payload Дополнительные данные.
+ * @param scope Scope сообщения.
+ * @param message Текст.
+ * @param payload Данные.
  */
 const print = (method: "error" | "info" | "warn", scope: string, message: string, payload?: LogPayload) => {
     const formattedMessage = `[${new Date().toISOString()}] [${scope}] ${message}${serializePayload(payload)}`;
@@ -34,23 +34,23 @@ const print = (method: "error" | "info" | "warn", scope: string, message: string
 };
 
 /**
- * Минимальный структурированный логгер приложения.
+ * Простой логгер.
  */
 export const logger = {
     /**
-     * Пишет сообщение уровня error.
+     * Пишет `error`.
      */
     error(scope: string, message: string, payload?: LogPayload) {
         print("error", scope, message, payload);
     },
     /**
-     * Пишет сообщение уровня info.
+     * Пишет `info`.
      */
     info(scope: string, message: string, payload?: LogPayload) {
         print("info", scope, message, payload);
     },
     /**
-     * Пишет сообщение уровня warn.
+     * Пишет `warn`.
      */
     warn(scope: string, message: string, payload?: LogPayload) {
         print("warn", scope, message, payload);

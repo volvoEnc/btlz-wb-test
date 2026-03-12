@@ -1,45 +1,45 @@
 /**
- * Строка представления тарифа для выгрузки в Google Sheets.
+ * Строка для Google Sheets.
  */
 export interface TariffSpreadsheetRow {
-    /** Базовая стоимость доставки короба. */
+    /** База доставки. */
     boxDeliveryBase: string | null;
-    /** Коэффициент доставки короба. */
+    /** Коэффициент доставки. */
     boxDeliveryCoefExpr: string | null;
-    /** Стоимость доставки за литр. */
+    /** Доставка за литр. */
     boxDeliveryLiter: string | null;
-    /** Базовая стоимость доставки силами маркетплейса. */
+    /** База доставки МП. */
     boxDeliveryMarketplaceBase: string | null;
-    /** Коэффициент доставки силами маркетплейса. */
+    /** Коэффициент доставки МП. */
     boxDeliveryMarketplaceCoefExpr: string | null;
-    /** Стоимость литра доставки силами маркетплейса. */
+    /** Доставка МП за литр. */
     boxDeliveryMarketplaceLiter: string | null;
-    /** Базовая стоимость хранения. */
+    /** База хранения. */
     boxStorageBase: string | null;
     /** Коэффициент хранения. */
     boxStorageCoefExpr: string | null;
-    /** Стоимость хранения за литр. */
+    /** Хранение за литр. */
     boxStorageLiter: string | null;
-    /** Дата следующего изменения тарифов коробов. */
-    dtNextBox: string;
-    /** Дата окончания действия максимального тарифа. */
-    dtTillMax: string;
-    /** Региональное название склада. */
+    /** Следующая дата изменения. */
+    dtNextBox: string | null;
+    /** Дата max-тарифа. */
+    dtTillMax: string | null;
+    /** География. */
     geoName: string;
-    /** Бизнес-дата тарифа. */
+    /** Дата тарифа. */
     tariffDate: string;
-    /** Время последнего обновления строки в БД. */
+    /** Когда обновили в БД. */
     updatedAt: string;
-    /** Наименование склада WB. */
+    /** Склад. */
     warehouseName: string;
 }
 
 /**
- * Готовое представление снимка тарифа для экспорта.
+ * Данные для выгрузки.
  */
 export interface TariffSpreadsheetView {
-    /** Строки выгрузки. */
+    /** Строки. */
     rows: TariffSpreadsheetRow[];
-    /** Дата снимка, который лег в основу выгрузки. */
+    /** Дата источника. */
     sourceDate: string;
 }

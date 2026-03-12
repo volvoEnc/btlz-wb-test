@@ -3,11 +3,11 @@ import type { SpreadsheetSyncStatus, SpreadsheetTarget } from "#domain/spreadshe
 import type { Knex } from "knex";
 
 /**
- * PostgreSQL-реализация репозитория целевых Google-таблиц.
+ * Репозиторий таблиц в PostgreSQL.
  */
 export class PostgresSpreadsheetTargetRepository implements SpreadsheetTargetRepository {
     /**
-     * @param knex Подключение knex к PostgreSQL.
+     * @param knex Подключение knex.
      */
     public constructor(private readonly knex: Knex) {}
 

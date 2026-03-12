@@ -1,5 +1,5 @@
 /**
- * Допустимые поля тарифа, по которым можно сортировать выгрузку.
+ * Поля сортировки.
  */
 export const tariffCoefficientFields = [
     "box_delivery_coef_expr",
@@ -8,6 +8,6 @@ export const tariffCoefficientFields = [
 ] as const;
 
 /**
- * Поле коэффициента, используемое для сортировки строк в Google Sheets.
+ * Поле коэффициента.
  */
 export type TariffCoefficientField = (typeof tariffCoefficientFields)[number];

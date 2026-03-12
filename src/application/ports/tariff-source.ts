@@ -1,17 +1,17 @@
 import type { DailyTariffSnapshot } from "#domain/tariffs/entities/daily-tariff-snapshot.js";
 
 /**
- * Порт получения тарифов из внешнего источника.
+ * Источник тарифов.
  */
 export interface TariffSource {
     /**
-     * Загружает снимок тарифов за указанную бизнес-дату.
+     * Загружает тарифы за день.
      *
-     * @param tariffDate Дата тарифа в формате `YYYY-MM-DD`.
+     * @param tariffDate Дата `YYYY-MM-DD`.
      */
     fetchDailyTariffs(tariffDate: string): Promise<DailyTariffSnapshot>;
     /**
-     * Возвращает `true`, если источник готов к работе и имеет нужные credentials.
+     * Проверяет конфиг.
      */
     isConfigured(): boolean;
 }

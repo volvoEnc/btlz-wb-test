@@ -6,42 +6,42 @@ import type { TariffCoefficientField } from "#domain/tariffs/value-objects/tarif
 import { logger } from "#utils/logger.js";
 
 /**
- * Зависимости сценария публикации тарифов в таблицы.
+ * Зависимости выгрузки в таблицы.
  */
 interface SyncCurrentTariffsToSpreadsheetsDependencies {
-    /** Монитор runtime-состояния. */
+    /** Монитор. */
     monitor: SyncMonitor;
-    /** Поле сортировки строк при выгрузке. */
+    /** Поле сортировки. */
     sortByCoefficient: TariffCoefficientField;
-    /** Адаптер публикации в табличную систему. */
+    /** Публикатор. */
     spreadsheetPublisher: SpreadsheetPublisher;
-    /** Репозиторий целевых таблиц. */
+    /** Репозиторий таблиц. */
     spreadsheetTargetRepository: SpreadsheetTargetRepository;
-    /** Репозиторий чтения тарифов. */
+    /** Репозиторий тарифов. */
     tariffRepository: TariffRepository;
 }
 
 /**
- * Команда синхронизации актуального тарифа в Google Sheets.
+ * Команда выгрузки в Sheets.
  */
 export interface SyncCurrentTariffsToSpreadsheetsCommand {
-    /** Предпочтительная бизнес-дата тарифа для выгрузки. */
+    /** Нужная дата. */
     preferredDate: string;
 }
 
 /**
- * Сценарий публикации актуальных тарифов в подключённые таблицы.
+ * Выгружает тарифы в Sheets.
  */
 export class SyncCurrentTariffsToSpreadsheetsUseCase {
     /**
-     * @param dependencies Подключенные порты приложения.
+     * @param dependencies Зависимости.
      */
     public constructor(private readonly dependencies: SyncCurrentTariffsToSpreadsheetsDependencies) {}
 
     /**
-     * Выполняет выгрузку тарифа в активные Google Sheets.
+     * Запускает выгрузку.
      *
-     * @param command Команда выполнения сценария.
+     * @param command Команда.
      */
     public async execute(command: SyncCurrentTariffsToSpreadsheetsCommand): Promise<void> {
         const { preferredDate } = command;

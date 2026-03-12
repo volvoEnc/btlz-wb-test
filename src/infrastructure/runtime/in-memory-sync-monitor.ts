@@ -1,7 +1,7 @@
 import type { SyncMonitor, SyncRuntimeState, SyncTaskName, SyncTaskState, SyncTaskStatus } from "#application/ports/sync-monitor.js";
 
 /**
- * Создаёт стартовое состояние фоновой задачи.
+ * Пустое состояние задачи.
  */
 const createTaskState = (): SyncTaskState => ({
     completedAt: null,
@@ -12,7 +12,7 @@ const createTaskState = (): SyncTaskState => ({
 });
 
 /**
- * In-memory реализация монитора runtime-состояния приложения.
+ * Монитор в памяти.
  */
 export class InMemorySyncMonitor implements SyncMonitor {
     private readonly state: SyncRuntimeState = {
@@ -30,7 +30,7 @@ export class InMemorySyncMonitor implements SyncMonitor {
     };
 
     /**
-     * Возвращает полную копию runtime-состояния для health endpoint.
+     * Возвращает копию состояния.
      */
     public getState(): SyncRuntimeState {
         return structuredClone(this.state);

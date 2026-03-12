@@ -3,7 +3,7 @@ import { Knex } from "knex";
 import { z } from "zod";
 
 /**
- * Схема валидации параметров соединения с PostgreSQL.
+ * Схема подключения к PostgreSQL.
  */
 const connectionSchema = z.object({
     host: z.string(),
@@ -14,12 +14,12 @@ const connectionSchema = z.object({
 });
 
 /**
- * Текущее окружение выполнения приложения.
+ * Текущее окружение.
  */
 const NODE_ENV = env.NODE_ENV;
 
 /**
- * Набор knex-конфигураций для development и production окружений.
+ * Конфиги knex.
  */
 const knexConfigs: Record<typeof NODE_ENV, Knex.Config> = {
     development: {
@@ -77,6 +77,6 @@ const knexConfigs: Record<typeof NODE_ENV, Knex.Config> = {
 };
 
 /**
- * Активная knex-конфигурация для текущего окружения.
+ * Активный конфиг.
  */
 export default knexConfigs[NODE_ENV];

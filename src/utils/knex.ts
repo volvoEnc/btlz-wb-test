@@ -2,12 +2,12 @@ import { migrate, seed } from "#postgres/knex.js";
 import { Command } from "commander";
 
 /**
- * CLI-обёртка над knex migrate/seed командами.
+ * CLI для migrate/seed.
  */
 const program = new Command();
 
 /**
- * Регистрирует migrate-команды CLI.
+ * Команды migrate.
  */
 program
     .command("migrate")
@@ -23,9 +23,7 @@ program
         if (action === "make") await migrate.make(arg);
         process.exit(0);
     });
-/**
- * Регистрирует seed-команды CLI.
- */
+/** Команды seed. */
 program.command("seed [action] [arg]").action(async (action, arg) => {
     if (!action) return;
     if (action === "run") await seed.run();
@@ -34,11 +32,11 @@ program.command("seed [action] [arg]").action(async (action, arg) => {
 });
 
 /**
- * Регистрирует пустую команду по умолчанию.
+ * Пустая команда по умолчанию.
  */
 program.command("default", { isDefault: true }).action(() => {});
 
 /**
- * Запускает разбор аргументов CLI.
+ * Запускает CLI.
  */
 program.parse();

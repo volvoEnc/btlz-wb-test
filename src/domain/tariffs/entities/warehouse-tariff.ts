@@ -1,27 +1,27 @@
 /**
- * Тариф WB по конкретному складу.
+ * Тариф по складу.
  */
 export interface WarehouseTariff {
-    /** Базовая стоимость доставки короба. */
+    /** База доставки. */
     boxDeliveryBase: number | null;
-    /** Коэффициент доставки короба. */
+    /** Коэффициент доставки. */
     boxDeliveryCoefExpr: number | null;
-    /** Стоимость доставки за литр. */
+    /** Доставка за литр. */
     boxDeliveryLiter: number | null;
-    /** Базовая стоимость доставки силами маркетплейса. */
+    /** База доставки МП. */
     boxDeliveryMarketplaceBase: number | null;
-    /** Коэффициент доставки силами маркетплейса. */
+    /** Коэффициент доставки МП. */
     boxDeliveryMarketplaceCoefExpr: number | null;
-    /** Стоимость литра доставки силами маркетплейса. */
+    /** Доставка МП за литр. */
     boxDeliveryMarketplaceLiter: number | null;
-    /** Базовая стоимость хранения. */
+    /** База хранения. */
     boxStorageBase: number | null;
     /** Коэффициент хранения. */
     boxStorageCoefExpr: number | null;
-    /** Стоимость хранения за литр. */
+    /** Хранение за литр. */
     boxStorageLiter: number | null;
-    /** Региональное название склада. */
+    /** География. */
     geoName: string;
-    /** Наименование склада WB. */
+    /** Склад. */
     warehouseName: string;
 }

@@ -89,3 +89,36 @@ test("WbBoxTariffsHttpSource throws on non-success HTTP status", async () => {
         globalThis.fetch = originalFetch;
     }
 });
+
+test("WbBoxTariffsHttpSource maps empty WB dates to null", async () => {
+    const originalFetch = globalThis.fetch;
+
+    globalThis.fetch = async () =>
+        new Response(
+            JSON.stringify({
+                response: {
+                    data: {
+                        dtNextBox: "",
+                        dtTillMax: "   ",
+                        warehouseList: [],
+                    },
+                },
+            }),
+            { status: 200 },
+        );
+
+    try {
+        const source = new WbBoxTariffsHttpSource({
+            apiUrl: "https://common-api.wildberries.ru/api/v1/tariffs/box",
+            requestTimeoutMs: 1000,
+            token: "secret",
+        });
+
+        const snapshot = await source.fetchDailyTariffs("2026-03-11");
+
+        assert.equal(snapshot.dtNextBox, null);
+        assert.equal(snapshot.dtTillMax, null);
+    } finally {
+        globalThis.fetch = originalFetch;
+    }
+});

@@ -1,65 +1,65 @@
 /**
- * Идентификатор отслеживаемой фоновой задачи.
+ * Имя фоновой задачи.
  */
 export type SyncTaskName = "googleSheetsSync" | "wbSync";
 /**
- * Статус фоновой задачи.
+ * Статус задачи.
  */
 export type SyncTaskStatus = "idle" | "running" | "success" | "error" | "skipped";
 
 /**
- * Текущее состояние фоновой задачи.
+ * Состояние задачи.
  */
 export interface SyncTaskState {
-    /** Момент завершения последнего запуска. */
+    /** Когда закончилась. */
     completedAt: string | null;
-    /** Дополнительные метаданные по последнему запуску. */
+    /** Детали. */
     details: Record<string, unknown>;
-    /** Текст ошибки последнего запуска, если он завершился неуспешно. */
+    /** Ошибка. */
     error: string | null;
-    /** Момент начала последнего запуска. */
+    /** Когда стартовала. */
     startedAt: string | null;
-    /** Финальный или текущий статус задачи. */
+    /** Статус. */
     status: SyncTaskStatus;
 }
 
 /**
- * Снимок runtime-состояния приложения для health endpoint.
+ * Состояние для health.
  */
 export interface SyncRuntimeState {
-    /** Базовая конфигурация запущенного приложения. */
+    /** Конфиг процесса. */
     configuration: {
-        /** HTTP-порт health endpoint. */
+        /** Порт. */
         appPort: number | null;
-        /** Имя листа Google Sheets по умолчанию. */
+        /** Имя листа. */
         googleSheetName: string | null;
-        /** Количество целевых таблиц из конфигурации. */
+        /** Сколько таблиц в конфиге. */
         spreadsheetTargets: number;
-        /** Таймзона расчёта бизнес-даты. */
+        /** Таймзона. */
         timeZone: string | null;
-        /** URL источника WB API. */
+        /** URL WB API. */
         wbApiUrl: string | null;
     };
-    /** Состояние последней синхронизации Google Sheets. */
+    /** Состояние Google Sheets. */
     googleSheetsSync: SyncTaskState;
-    /** Время следующего планового запуска. */
+    /** Следующий запуск. */
     nextRunAt: string | null;
-    /** Момент старта процесса приложения. */
+    /** Старт процесса. */
     startedAt: string;
-    /** Состояние последней синхронизации WB. */
+    /** Состояние WB. */
     wbSync: SyncTaskState;
 }
 
 /**
- * Порт мониторинга состояния фоновых синхронизаций.
+ * Монитор синков.
  */
 export interface SyncMonitor {
     /**
-     * Завершает задачу с финальным статусом и метаданными.
+     * Завершает задачу.
      *
-     * @param taskName Имя фоновой задачи.
-     * @param status Итоговый статус выполнения.
-     * @param details Дополнительные метаданные о выполнении.
+     * @param taskName Имя задачи.
+     * @param status Статус.
+     * @param details Детали.
      */
     markTaskFinished(
         taskName: SyncTaskName,
@@ -67,22 +67,22 @@ export interface SyncMonitor {
         details?: Record<string, unknown>,
     ): void;
     /**
-     * Помечает задачу как запущенную.
+     * Помечает запуск.
      *
-     * @param taskName Имя фоновой задачи.
-     * @param details Метаданные запуска.
+     * @param taskName Имя задачи.
+     * @param details Детали.
      */
     markTaskStarted(taskName: SyncTaskName, details?: Record<string, unknown>): void;
     /**
-     * Обновляет конфигурационные данные runtime-состояния.
+     * Обновляет конфиг.
      *
-     * @param configuration Частичное обновление runtime-конфигурации.
+     * @param configuration Часть конфига.
      */
     setConfiguration(configuration: Partial<SyncRuntimeState["configuration"]>): void;
     /**
-     * Обновляет время следующего запуска планировщика.
+     * Пишет время следующего запуска.
      *
-     * @param nextRunAt Следующее время запуска или `null`, если расписание остановлено.
+     * @param nextRunAt Время запуска или `null`.
      */
     setNextRunAt(nextRunAt: Date | null): void;
 }

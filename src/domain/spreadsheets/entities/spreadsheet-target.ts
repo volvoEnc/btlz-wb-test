@@ -1,14 +1,14 @@
 /**
- * Целевая Google-таблица для синхронизации тарифов.
+ * Таблица для выгрузки.
  */
 export interface SpreadsheetTarget {
-    /** Имя листа внутри таблицы. */
+    /** Имя листа. */
     sheetName: string;
-    /** Идентификатор Google Spreadsheet. */
+    /** ID таблицы. */
     spreadsheetId: string;
 }
 
 /**
- * Результат последней попытки синхронизации таблицы.
+ * Статус последнего синка.
  */
 export type SpreadsheetSyncStatus = "success" | "error" | "skipped";

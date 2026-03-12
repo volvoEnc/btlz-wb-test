@@ -1,101 +1,70 @@
 # WB Tariffs Sync Service
 
-Сервис решает 2 задачи:
+Сервис делает две вещи:
 
-1. Ежечасно получает тарифы WB для коробов и сохраняет их в PostgreSQL.
-2. Ежечасно обновляет актуальные данные из PostgreSQL в произвольное количество Google Sheets по `spreadsheetId`.
+1. Раз в час забирает тарифы WB по коробам и пишет их в PostgreSQL.
+2. Раз в час обновляет актуальные данные в Google Sheets по `spreadsheetId`.
 
-Источник данных WB: `GET https://common-api.wildberries.ru/api/v1/tariffs/box`
+Источник WB: `GET https://common-api.wildberries.ru/api/v1/tariffs/box`
 
-Документация WB: https://dev.wildberries.ru/en/docs/openapi/wb-tariffs
-
-## Что делает приложение
-
-- При старте автоматически применяет миграции.
-- Сразу выполняет первый цикл синхронизации.
-- Затем запускает почасовой планировщик.
-- Для каждого дня хранит один актуальный набор тарифов.
-- Повторный запрос в течение того же дня обновляет данные за этот день, а не создаёт дубликаты.
-- Синхронизирует данные в лист `stocks_coefs` у всех указанных Google-таблиц.
-- Сортирует строки по возрастанию коэффициента.
-
-По умолчанию сортировка выполняется по `box_delivery_coef_expr`.
-Это можно изменить через `SORT_BY_COEFFICIENT`.
-
-## Стек
+## Что внутри
 
 - Node.js 20
 - TypeScript
 - PostgreSQL
-- knex.js
+- `knex`
 - Google Sheets API
-- Docker / Docker Compose
+- Docker Compose
 
-## Архитектура
+Код разложен на `domain`, `application`, `infrastructure`.
 
-Проект разложен по принципам Clean Architecture с доменной моделью в духе DDD:
+## Как хранятся данные
 
-- `src/domain`:
-  сущности предметной области `DailyTariffSnapshot`, `WarehouseTariff`, `SpreadsheetTarget` и value object для поля сортировки.
-- `src/application`:
-  порты и use case'ы.
-  Здесь описаны сценарии `SyncDailyWbTariffs`, `SyncCurrentTariffsToSpreadsheets`, `RunTariffSyncCycle`.
-- `src/infrastructure`:
-  адаптеры PostgreSQL, Wildberries API, Google Sheets, in-memory monitor и планировщик.
-- `src/app.ts`:
-  composition root, где только связываются зависимости.
+- `wb_box_tariff_snapshots` — одна запись на день.
+- `wb_box_tariff_warehouses` — тарифы по складам за день.
+- `spreadsheets` — список таблиц и статус последней выгрузки.
 
-Зависимости направлены внутрь:
+Повторный запрос в тот же день обновляет запись за день, а не создаёт новую.
 
-- `infrastructure -> application -> domain`
+## Настройка
 
-Бизнес-логика не зависит от HTTP, PostgreSQL, Google Sheets и таймеров Node.js.
-
-## Структура данных в PostgreSQL
-
-Используются 3 таблицы:
-
-- `spreadsheets`:
-  хранит идентификаторы Google Sheets, имя листа, признак активности и статус последней синхронизации.
-- `wb_box_tariff_snapshots`:
-  одна запись на дату тарифа, содержит `dt_next_box`, `dt_till_max`, время загрузки и исходный payload WB.
-- `wb_box_tariff_warehouses`:
-  тарифы по складам за конкретную дату.
-
-Такое разделение позволяет:
-
-- хранить историю по дням;
-- обновлять только текущий день при повторных почасовых запросах;
-- не дублировать общие поля ответа WB по всем складам.
-
-## Конфигурация
-
-В репозитории есть шаблон: `.env.example`
-
-Минимально:
+В репозитории есть шаблон `.env.example`.
 
 ```bash
 cp .env.example .env
 ```
 
-Заполните в `.env`:
+Обязательные переменные:
 
-- `WB_API_TOKEN`:
-  токен Wildberries API.
-- `GOOGLE_SPREADSHEET_IDS`:
-  список spreadsheet ID через запятую.
-- `GOOGLE_SERVICE_ACCOUNT_CREDENTIALS_BASE64`:
-  base64 от JSON-ключа service account.
+- `WB_API_TOKEN`
+- `GOOGLE_SPREADSHEET_IDS`
+- `GOOGLE_SERVICE_ACCOUNT_CREDENTIALS_BASE64`
 
-Остальные параметры уже имеют безопасные дефолты.
+Полезные переменные:
 
-Параметры PostgreSQL фиксированы по условию:
+- `APP_TIMEZONE=Europe/Moscow`
+- `FETCH_INTERVAL_MINUTES=60`
+- `GOOGLE_SHEET_NAME=stocks_coefs`
+- `SORT_BY_COEFFICIENT=box_delivery_coef_expr`
 
-- БД: `postgres`
+Поддерживаемые значения `SORT_BY_COEFFICIENT`:
+
+- `box_delivery_coef_expr`
+- `box_delivery_marketplace_coef_expr`
+- `box_storage_coef_expr`
+
+Для `APP_TIMEZONE` нужны IANA-имена, например `Europe/Moscow` или `Asia/Yekaterinburg`.
+Значения вида `GMT+0300` не подойдут.
+
+Параметры БД по условию уже зафиксированы:
+
+- база: `postgres`
 - пользователь: `postgres`
 - пароль: `postgres`
 
-### Как получить `GOOGLE_SERVICE_ACCOUNT_CREDENTIALS_BASE64`
+## Google service account
+
+Нужен JSON-ключ сервисного аккаунта, закодированный в base64.
 
 macOS:
 
@@ -111,58 +80,48 @@ base64 -w 0 service-account.json
 
 Важно:
 
-- сервисный аккаунт должен иметь доступ к каждой таблице;
-- лист создаётся автоматически, если `stocks_coefs` ещё нет.
+- таблицы должны быть расшарены на `client_email` из этого JSON;
+- в `GOOGLE_SPREADSHEET_IDS` нужен именно `spreadsheetId`;
+- лист `stocks_coefs` создаётся автоматически.
 
 ## Запуск
 
-После заполнения `.env` достаточно одной команды:
+После заполнения `.env` достаточно:
 
 ```bash
-docker compose up --build
+docker compose up
 ```
 
-## Что происходит после старта
+На старте приложение:
 
-- поднимается PostgreSQL;
-- приложение применяет миграции;
-- выполняет первую загрузку тарифов WB;
-- записывает/обновляет данные за текущую дату в БД;
-- выгружает актуальные данные в Google Sheets;
-- далее повторяет цикл каждый час.
+- поднимает PostgreSQL;
+- применяет миграции;
+- сразу делает первый цикл;
+- дальше работает по расписанию.
 
-Если токен WB или Google credentials не указаны, контейнер всё равно стартует, но соответствующий этап будет пропущен с понятным сообщением в логах.
+Если нет `WB_API_TOKEN` или Google credentials, контейнер стартует, но нужный этап будет пропущен.
 
-## Проверка работы
+## Проверка
 
-### 1. Проверка compose-конфига
+Проверить compose:
 
 ```bash
 docker compose config
 ```
 
-### 2. Проверка health endpoint
-
-После старта сервиса:
+Проверить health:
 
 ```bash
 curl http://localhost:3000/health
 ```
 
-В ответе будет текущее состояние воркера:
-
-- статус последней синхронизации WB;
-- статус синхронизации Google Sheets;
-- время следующего запуска;
-- базовая конфигурация сервиса.
-
-### 3. Проверка логов
+Посмотреть логи:
 
 ```bash
 docker compose logs -f app
 ```
 
-### 4. Проверка данных в PostgreSQL
+Проверить данные в БД:
 
 ```bash
 docker compose exec postgres psql -U postgres -d postgres
@@ -176,21 +135,7 @@ select * from wb_box_tariff_warehouses order by tariff_date desc, box_delivery_c
 select * from spreadsheets order by spreadsheet_id;
 ```
 
-## Полезные переменные
-
-- `APP_PORT=3000`
-- `APP_TIMEZONE=Europe/Moscow`
-- `FETCH_INTERVAL_MINUTES=60`
-- `GOOGLE_SHEET_NAME=stocks_coefs`
-- `SORT_BY_COEFFICIENT=box_delivery_coef_expr`
-
-Поддерживаемые значения `SORT_BY_COEFFICIENT`:
-
-- `box_delivery_coef_expr`
-- `box_delivery_marketplace_coef_expr`
-- `box_storage_coef_expr`
-
-## Локальная проверка без Docker
+## Локальный запуск
 
 ```bash
 npm ci
@@ -198,32 +143,12 @@ npm run build
 npm run start
 ```
 
-Для локального запуска нужен доступный PostgreSQL и заполненные переменные окружения.
+Нужны доступный PostgreSQL и заполненный `.env`.
 
-## Unit tests
-
-Запуск всех unit-тестов:
+## Тесты
 
 ```bash
 npm test
 ```
 
-Тесты написаны на TypeScript и расположены рядом с исходными файлами в `src/**/*.test.ts`.
-
-Тестами покрыты ключевые слои:
-
-- application use case'ы;
-- инфраструктурные адаптеры WB API и Google Sheets;
-- scheduler и runtime monitor;
-- health handler;
-- date utilities.
-
-## Что уже подготовлено в репозитории
-
-- Dockerfile
-- `compose.yaml`
-- миграции knex
-- конфигурационный шаблон `.env.example`
-- сервис почасовой загрузки WB
-- сервис выгрузки в Google Sheets
-- health endpoint `/health`
+Тесты лежат рядом с кодом: `src/**/*.test.ts`.

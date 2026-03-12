@@ -5,21 +5,21 @@ import { formatDateInTimeZone, getNextHourBoundary } from "#utils/date.js";
 import { logger } from "#utils/logger.js";
 
 /**
- * Конфигурация почасового планировщика синхронизации.
+ * Конфиг планировщика.
  */
 interface HourlySyncSchedulerConfig {
-    /** Интервал планового запуска в минутах. */
+    /** Интервал, минут. */
     fetchIntervalMinutes: number;
-    /** Монитор runtime-состояния. */
+    /** Монитор. */
     monitor: SyncMonitor;
-    /** Use case полного цикла синхронизации. */
+    /** Полный цикл. */
     runTariffSyncCycleUseCase: RunTariffSyncCycleUseCase;
-    /** Таймзона вычисления бизнес-даты. */
+    /** Таймзона. */
     timeZone: string;
 }
 
 /**
- * Планировщик, запускающий полный цикл синхронизации по расписанию.
+ * Почасовой планировщик.
  */
 export class HourlySyncScheduler {
     private intervalHandle: NodeJS.Timeout | null = null;
@@ -30,23 +30,23 @@ export class HourlySyncScheduler {
     public constructor(private readonly config: HourlySyncSchedulerConfig) {}
 
     /**
-     * Возвращает время следующего планового запуска.
+     * Возвращает следующий запуск.
      */
     public getNextRunAt(): Date {
         return this.nextRunAt;
     }
 
     /**
-     * Запускает цикл синхронизации немедленно.
+     * Запускает сразу.
      *
-     * @param trigger Причина запуска.
+     * @param trigger Причина.
      */
     public async runNow(trigger: SyncTrigger): Promise<void> {
         await this.execute(trigger);
     }
 
     /**
-     * Запускает расписание почасовой синхронизации.
+     * Стартует расписание.
      */
     public start(): void {
         const now = new Date();
@@ -74,7 +74,7 @@ export class HourlySyncScheduler {
     }
 
     /**
-     * Останавливает активные таймеры планировщика.
+     * Останавливает таймеры.
      */
     public async stop(): Promise<void> {
         if (this.startupHandle) {
@@ -91,9 +91,9 @@ export class HourlySyncScheduler {
     }
 
     /**
-     * Выполняет один цикл синхронизации с защитой от пересечения запусков.
+     * Выполняет один цикл.
      *
-     * @param trigger Причина запуска.
+     * @param trigger Причина.
      */
     private async execute(trigger: SyncTrigger): Promise<void> {
         if (this.isRunning) {

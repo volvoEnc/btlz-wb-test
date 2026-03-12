@@ -3,30 +3,30 @@ import { logger } from "#utils/logger.js";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 
 /**
- * Конфигурация HTTP-сервера health endpoint.
+ * Конфиг health-сервера.
  */
 interface HealthServerConfig {
-    /** HTTP-host для прослушивания. */
+    /** Host. */
     host: string;
-    /** Монитор runtime-состояния приложения. */
+    /** Монитор. */
     monitor: InMemorySyncMonitor;
-    /** HTTP-порт для health endpoint. */
+    /** Порт. */
     port: number;
 }
 
 /**
- * Создаёт request handler для health endpoint.
+ * Делает handler для `/health`.
  *
- * @param monitor Монитор runtime-состояния приложения.
+ * @param monitor Монитор.
  */
 export function createHealthRequestHandler(
     monitor: InMemorySyncMonitor,
 ): (request: IncomingMessage, response: ServerResponse) => void {
     /**
-     * Обрабатывает входящие запросы health endpoint.
+     * Обрабатывает запрос.
      *
-     * @param request Входящий HTTP-запрос.
-     * @param response HTTP-ответ.
+     * @param request Запрос.
+     * @param response Ответ.
      */
     return (request: IncomingMessage, response: ServerResponse): void => {
         if (request.url !== "/health") {
@@ -47,9 +47,9 @@ export function createHealthRequestHandler(
 }
 
 /**
- * Поднимает HTTP endpoint `/health` с runtime-состоянием приложения.
+ * Поднимает `/health`.
  *
- * @param config Конфигурация health-сервера.
+ * @param config Конфиг.
  */
 export function createHealthServer(config: HealthServerConfig): Server {
     const server = createServer(createHealthRequestHandler(config.monitor));

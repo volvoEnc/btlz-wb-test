@@ -4,45 +4,45 @@ import type { TariffSource } from "#application/ports/tariff-source.js";
 import { logger } from "#utils/logger.js";
 
 /**
- * Идентификатор происхождения запуска синхронизации.
+ * Причина запуска.
  */
 export type SyncTrigger = "hourly" | "startup";
 
 /**
- * Зависимости сценария загрузки тарифов WB.
+ * Зависимости загрузки WB.
  */
 interface SyncDailyWbTariffsDependencies {
-    /** Монитор runtime-состояния. */
+    /** Монитор. */
     monitor: SyncMonitor;
-    /** Репозиторий сохранения тарифов. */
+    /** Репозиторий тарифов. */
     tariffRepository: TariffRepository;
-    /** Внешний источник тарифов WB. */
+    /** Источник WB. */
     tariffSource: TariffSource;
 }
 
 /**
- * Команда запуска сценария синхронизации дневного тарифа.
+ * Команда загрузки.
  */
 export interface SyncDailyWbTariffsCommand {
-    /** Бизнес-дата, за которую нужно получить тарифы. */
+    /** Дата. */
     businessDate: string;
-    /** Тип запуска: стартовый или плановый. */
+    /** Причина запуска. */
     trigger: SyncTrigger;
 }
 
 /**
- * Сценарий загрузки тарифов WB и сохранения их в хранилище.
+ * Загружает тарифы WB.
  */
 export class SyncDailyWbTariffsUseCase {
     /**
-     * @param dependencies Подключенные порты приложения.
+     * @param dependencies Зависимости.
      */
     public constructor(private readonly dependencies: SyncDailyWbTariffsDependencies) {}
 
     /**
-     * Выполняет загрузку тарифов WB за одну бизнес-дату.
+     * Запускает загрузку.
      *
-     * @param command Команда выполнения сценария.
+     * @param command Команда.
      */
     public async execute(command: SyncDailyWbTariffsCommand): Promise<void> {
         const { businessDate, trigger } = command;

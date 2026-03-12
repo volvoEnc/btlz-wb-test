@@ -1,26 +1,26 @@
 import type { SpreadsheetSyncStatus, SpreadsheetTarget } from "#domain/spreadsheets/entities/spreadsheet-target.js";
 
 /**
- * Порт доступа к целям синхронизации Google Sheets.
+ * Хранилище таблиц.
  */
 export interface SpreadsheetTargetRepository {
     /**
-     * Возвращает все активные таблицы, в которые нужно выгружать тарифы.
+     * Возвращает активные таблицы.
      */
     getEnabledTargets(): Promise<SpreadsheetTarget[]>;
     /**
-     * Сохраняет результат последней синхронизации для конкретной таблицы.
+     * Пишет результат синка.
      *
-     * @param spreadsheetId Идентификатор таблицы.
-     * @param status Финальный статус синхронизации.
-     * @param errorMessage Текст ошибки, если синхронизация завершилась неуспешно.
+     * @param spreadsheetId ID таблицы.
+     * @param status Статус.
+     * @param errorMessage Ошибка.
      */
     saveSyncResult(spreadsheetId: string, status: SpreadsheetSyncStatus, errorMessage?: string): Promise<void>;
     /**
-     * Синхронизирует список активных таблиц в хранилище с конфигурацией приложения.
+     * Обновляет список таблиц из конфига.
      *
-     * @param spreadsheetIds Набор spreadsheet ID из конфигурации.
-     * @param sheetName Имя листа, куда публикуются тарифы.
+     * @param spreadsheetIds Список ID.
+     * @param sheetName Имя листа.
      */
     syncConfiguredTargets(spreadsheetIds: string[], sheetName: string): Promise<void>;
 }

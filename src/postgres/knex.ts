@@ -2,16 +2,16 @@ import _knex from "knex";
 import knexConfig from "#config/knex/knexfile.js";
 
 /**
- * Единый экземпляр knex для всего приложения.
+ * Общий экземпляр knex.
  */
 const knex = _knex(knexConfig);
 export default knex;
 
 /**
- * Логирует результат выполнения миграции.
+ * Печатает результат миграции.
  *
- * @param action Тип выполненного действия.
- * @param result Результат от knex migrate API.
+ * @param action Действие.
+ * @param result Результат.
  */
 function logMigrationResults(action: string, result: [number, string[]]) {
     if (result[1].length === 0) {
@@ -24,9 +24,9 @@ function logMigrationResults(action: string, result: [number, string[]]) {
     }
 }
 /**
- * Логирует список выполненных и ожидающих миграций.
+ * Печатает список миграций.
  *
- * @param list Список completed и pending миграций.
+ * @param list Выполненные и pending.
  */
 function logMigrationList(list: [{ name: string }[], { file: string }[]]) {
     console.log(`Found ${list[0].length} Completed Migration file/files.`);
@@ -40,9 +40,9 @@ function logMigrationList(list: [{ name: string }[], { file: string }[]]) {
 }
 
 /**
- * Логирует результат выполнения seed-файлов.
+ * Печатает результат seed.
  *
- * @param result Результат от knex seed API.
+ * @param result Результат.
  */
 function logSeedRun(result: [string[]]) {
     if(result[0].length === 0) {
@@ -56,16 +56,16 @@ function logSeedRun(result: [string[]]) {
 }
 
 /**
- * Логирует имя созданного seed-файла.
+ * Печатает имя seed.
  *
- * @param name Полный путь к созданному файлу.
+ * @param name Путь к файлу.
  */
 function logSeedMake(name: string) {
     console.log(`Created seed: ${name.split(/\/|\\/).pop()}`);
 }
 
 /**
- * Набор обёрток вокруг knex migrate API.
+ * Обёртки над migrate API.
  */
 export const migrate = {
     latest: async () => {
@@ -93,7 +93,7 @@ export const migrate = {
 };
 
 /**
- * Набор обёрток вокруг knex seed API.
+ * Обёртки над seed API.
  */
 export const seed = {
     run: async () => {

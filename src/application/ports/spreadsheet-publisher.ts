@@ -2,18 +2,18 @@ import type { TariffSpreadsheetView } from "#application/dto/tariff-spreadsheet-
 import type { SpreadsheetTarget } from "#domain/spreadsheets/entities/spreadsheet-target.js";
 
 /**
- * Порт публикации тарифов в внешнюю табличную систему.
+ * Публикация в таблицы.
  */
 export interface SpreadsheetPublisher {
     /**
-     * Возвращает `true`, если publisher готов к работе и имеет нужные credentials.
+     * Проверяет конфиг.
      */
     isConfigured(): boolean;
     /**
-     * Публикует подготовленное представление тарифа в конкретную таблицу.
+     * Пишет тарифы в таблицу.
      *
-     * @param target Целевая таблица.
-     * @param view Подготовленное представление тарифа.
+     * @param target Цель.
+     * @param view Данные.
      */
     publishTariffs(target: SpreadsheetTarget, view: TariffSpreadsheetView): Promise<void>;
 }

@@ -1,10 +1,28 @@
 /**
- * Форматирует дату в `YYYY-MM-DD` в указанной таймзоне.
+ * Проверяет таймзону.
  *
- * @param date Исходная дата.
- * @param timeZone IANA-таймзона.
+ * @param timeZone Имя таймзоны.
+ */
+export function isSupportedTimeZone(timeZone: string): boolean {
+    try {
+        new Intl.DateTimeFormat("en-US", { timeZone });
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+/**
+ * Форматирует дату в `YYYY-MM-DD`.
+ *
+ * @param date Дата.
+ * @param timeZone Таймзона.
  */
 export function formatDateInTimeZone(date: Date, timeZone: string): string {
+    if (!isSupportedTimeZone(timeZone)) {
+        throw new RangeError(`Unsupported time zone: ${timeZone}`);
+    }
+
     const formatter = new Intl.DateTimeFormat("en-US", {
         day: "2-digit",
         month: "2-digit",
@@ -19,9 +37,9 @@ export function formatDateInTimeZone(date: Date, timeZone: string): string {
 }
 
 /**
- * Вычисляет ближайшую следующую границу часа.
+ * Даёт начало следующего часа.
  *
- * @param date Базовая дата расчёта.
+ * @param date Базовая дата.
  */
 export function getNextHourBoundary(date: Date): Date {
     const nextDate = new Date(date);

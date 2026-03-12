@@ -1,19 +1,19 @@
 import type { WarehouseTariff } from "#domain/tariffs/entities/warehouse-tariff.js";
 
 /**
- * Актуальный снимок тарифов WB за одну бизнес-дату.
+ * Снимок тарифов за день.
  */
 export interface DailyTariffSnapshot {
-    /** Дата следующего изменения тарифов коробов. */
-    dtNextBox: string;
-    /** Дата, до которой действует максимальный тариф. */
-    dtTillMax: string;
-    /** Момент фактической загрузки данных из WB API. */
+    /** Следующая дата изменения. */
+    dtNextBox: string | null;
+    /** Дата max-тарифа. */
+    dtTillMax: string | null;
+    /** Когда получили ответ. */
     fetchedAt: string;
-    /** Исходный payload WB API для аудита и диагностики. */
+    /** Исходный payload. */
     sourcePayload: unknown;
-    /** Бизнес-дата, к которой относится снимок тарифа. */
+    /** Дата тарифа. */
     tariffDate: string;
-    /** Набор тарифов по складам за указанную дату. */
+    /** Тарифы по складам. */
     warehouses: WarehouseTariff[];
 }

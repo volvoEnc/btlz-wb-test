@@ -1,13 +1,14 @@
 import dotenv from "dotenv";
 import { tariffCoefficientFields } from "#domain/tariffs/value-objects/tariff-coefficient-field.js";
+import { isSupportedTimeZone } from "#utils/date.js";
 import { z } from "zod";
 
 dotenv.config();
 
 /**
- * Преобразует пустые строки из окружения в `undefined`.
+ * Пустую строку из env превращает в `undefined`.
  *
- * @param value Сырое значение переменной окружения.
+ * @param value Значение из env.
  */
 const emptyStringToUndefined = (value: unknown) => {
     if (typeof value !== "string") {
@@ -19,12 +20,19 @@ const emptyStringToUndefined = (value: unknown) => {
 };
 
 /**
- * Общая схема optional-строк, в которых пустое значение считается отсутствующим.
+ * Optional-строка без пустых значений.
  */
 const optionalNonEmptyString = z.preprocess(emptyStringToUndefined, z.string().min(1).optional());
 
 /**
- * Схема валидации переменных окружения приложения.
+ * Валидная IANA-таймзона.
+ */
+const timeZoneSchema = z.string().refine(isSupportedTimeZone, {
+    message: "APP_TIMEZONE must be a valid IANA time zone, for example Europe/Moscow or Asia/Yekaterinburg",
+});
+
+/**
+ * Схема env.
  */
 const envSchema = z.object({
     NODE_ENV: z.enum(["development", "production"]).default("development"),
@@ -35,7 +43,7 @@ const envSchema = z.object({
     POSTGRES_PASSWORD: z.string().default("postgres"),
     APP_PORT: z.coerce.number().int().positive().default(3000),
     HTTP_HOST: z.string().default("0.0.0.0"),
-    APP_TIMEZONE: z.string().default("Europe/Moscow"),
+    APP_TIMEZONE: timeZoneSchema.default("Europe/Moscow"),
     FETCH_INTERVAL_MINUTES: z.coerce.number().int().positive().default(60),
     WB_API_URL: z.string().url().default("https://common-api.wildberries.ru/api/v1/tariffs/box"),
     WB_API_TOKEN: optionalNonEmptyString,
@@ -47,12 +55,12 @@ const envSchema = z.object({
 });
 
 /**
- * Провалидированные переменные окружения в сыром виде.
+ * Провалидированный env.
  */
 const parsedEnv = envSchema.parse(process.env);
 
 /**
- * Нормализованная runtime-конфигурация приложения.
+ * Env для приложения.
  */
 const env = {
     ...parsedEnv,

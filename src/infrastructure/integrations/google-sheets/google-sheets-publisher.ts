@@ -4,7 +4,7 @@ import type { SpreadsheetTarget } from "#domain/spreadsheets/entities/spreadshee
 import { google, sheets_v4 } from "googleapis";
 
 /**
- * Данные сервисного аккаунта Google, необходимые для авторизации.
+ * Данные сервисного аккаунта.
  */
 interface GoogleSheetsCredentials {
     client_email: string;
@@ -12,17 +12,17 @@ interface GoogleSheetsCredentials {
 }
 
 /**
- * Конфигурация publisher'а Google Sheets.
+ * Конфиг Google Sheets.
  */
 interface GoogleSheetsPublisherConfig {
-    /** Base64-строка с JSON credentials сервисного аккаунта. */
+    /** Base64 JSON с ключом. */
     credentialsBase64?: string;
-    /** Подставной клиент для unit-тестов и изолированных сценариев. */
+    /** Клиент для тестов. */
     sheetsClient?: sheets_v4.Sheets | null;
 }
 
 /**
- * Заголовки таблицы `stocks_coefs`.
+ * Заголовок `stocks_coefs`.
  */
 const headerRow = [
     "Дата тарифа",
@@ -43,9 +43,9 @@ const headerRow = [
 ];
 
 /**
- * Декодирует и валидирует credentials сервисного аккаунта.
+ * Читает credentials.
  *
- * @param credentialsBase64 Base64-представление JSON credentials.
+ * @param credentialsBase64 Base64 JSON.
  */
 function parseCredentials(credentialsBase64?: string): GoogleSheetsCredentials | null {
     if (!credentialsBase64) {
@@ -66,9 +66,9 @@ function parseCredentials(credentialsBase64?: string): GoogleSheetsCredentials |
 }
 
 /**
- * Создаёт авторизованный клиент Google Sheets API.
+ * Создаёт клиент Sheets.
  *
- * @param credentialsBase64 Base64-представление JSON credentials.
+ * @param credentialsBase64 Base64 JSON.
  */
 function createSheetsClient(credentialsBase64?: string): sheets_v4.Sheets | null {
     const credentials = parseCredentials(credentialsBase64);
@@ -89,10 +89,10 @@ function createSheetsClient(credentialsBase64?: string): sheets_v4.Sheets | null
 }
 
 /**
- * Убеждается, что целевой лист существует, и создаёт его при необходимости.
+ * Создаёт лист, если его нет.
  *
- * @param client Авторизованный клиент Google Sheets.
- * @param spreadsheetId Идентификатор таблицы.
+ * @param client Клиент.
+ * @param spreadsheetId ID таблицы.
  * @param sheetName Имя листа.
  */
 async function ensureSheetExists(client: sheets_v4.Sheets, spreadsheetId: string, sheetName: string): Promise<void> {
@@ -124,13 +124,13 @@ async function ensureSheetExists(client: sheets_v4.Sheets, spreadsheetId: string
 }
 
 /**
- * Google Sheets-адаптер публикации тарифов в лист `stocks_coefs`.
+ * Пишет тарифы в Google Sheets.
  */
 export class GoogleSheetsPublisher implements SpreadsheetPublisher {
     private readonly client: sheets_v4.Sheets | null;
 
     /**
-     * @param config Конфигурация publisher'а.
+     * @param config Конфиг.
      */
     public constructor(private readonly config: GoogleSheetsPublisherConfig) {
         this.client = this.config.sheetsClient ?? createSheetsClient(this.config.credentialsBase64);
@@ -165,8 +165,8 @@ export class GoogleSheetsPublisher implements SpreadsheetPublisher {
                     headerRow,
                     ...view.rows.map((row) => [
                         row.tariffDate,
-                        row.dtNextBox,
-                        row.dtTillMax,
+                        row.dtNextBox ?? "",
+                        row.dtTillMax ?? "",
                         row.warehouseName,
                         row.geoName,
                         row.boxDeliveryCoefExpr ?? "",
